@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { AuthorsPrismaRepository } from '@/authors/repositories/authors-prisma.repository'
 import { PrismaClient } from '@prisma/client'
 import { execSync } from 'node:child_process'
+import { NotFoundError } from '@/shared/errors/not-found-error'
 
 describe( 'AuthorsPrismaRepository', () => {
   let module: TestingModule;
@@ -22,5 +23,26 @@ describe( 'AuthorsPrismaRepository', () => {
 
   afterAll(async () => {
     await module.close();
+  })
+
+  test('should throws an error when id is not found', async () => {
+    let id = "37a03e31-1282-4a79-98c6-c08b7b0a88b0";
+
+    await expect(repository.findById(id)).rejects.toThrow(
+      new NotFoundError(`Author with id ${id} not found`)
+    );
+  })
+
+  test('should find an author by id', async () => {
+    let data = {
+      name: 'John Doe',
+      email: 'JohnD@d.com'
+    }
+    const author = await prisma.author.create({
+      data,
+    });
+
+    const res = await repository.findById(author.id);
+    expect(res).toStrictEqual(author);
   })
 })
