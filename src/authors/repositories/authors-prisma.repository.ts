@@ -5,10 +5,13 @@ import {
 } from '@/authors/interfaces/authors.repository'
 import { Author } from '../graphql/models/author'
 import { ICreateAuthor } from '../interfaces/create-author'
+import { PrismaService } from '@/database/prisma/prisma.service'
 
 export class AuthorsPrismaRepository implements IAuthorsRepository {
 
   sortableFields: String[] = ['name', 'email', 'createdAt']
+
+  constructor(private prisma: PrismaService) {}
 
   create(data: ICreateAuthor): Promise<Author> {
     throw new Error('Method not implemented.')
