@@ -3,6 +3,7 @@ import { Author } from '../graphql/models/author'
 import { ICreateAuthor } from '../interfaces/create-author'
 import { PrismaService } from '@/database/prisma/prisma.service'
 import { NotFoundError } from '@/shared/errors/not-found-error'
+import { Prisma } from '@prisma/client'
 
 export class AuthorsPrismaRepository implements IAuthorsRepository {
 
@@ -32,44 +33,35 @@ export class AuthorsPrismaRepository implements IAuthorsRepository {
 
   async search(params: SearchParams): Promise<SearchResult> {
     const { page = 1, perPage = 15, filter, sort, sortDir } = params;
-    const sortable = sort? this.sortableFields.includes(sort) || false;
-    const orderByField = sort? sortable ? sort : 'createdAt';
-    const orderByDir = sortable ? sort : 'desc';
 
-    const count = await this.prisma.author.count({
-      ...(filter && {
-        where: {
-          OR: [
-            { name: { contains: filter, mode: 'insensitive' } },
-            { email: { contains: filter, mode: 'insensitive' } }
-          ]
-        }
-      })
-    });
+    const isSortable = (s?: string) => !!s && this.sortableFields.includes(s);
+    const orderByField = isSortable(sort) ? sort! : 'createdAt';
+    const orderByDir: 'asc' | 'desc' = sortDir ?? 'desc';
 
+    const where: Prisma.AuthorWhereInput | undefined = filter
+      ? {
+        OR: [
+          { name: { contains: filter, mode: 'insensitive' } },
+          { email: { contains: filter, mode: 'insensitive' } },
+        ],
+      }
+      : undefined;
+
+    const total = await this.prisma.author.count({ where });
     const authors = await this.prisma.author.findMany({
-      ...(filter && {
-        where: {
-          OR: [
-            { name: { contains: filter, mode: 'insensitive' } },
-            { email: { contains: filter, mode: 'insensitive' } }
-          ]
-        }
-      }),
-      orderBy: {
-        [orderByField]: orderByDir,
-      },
-      skip: page > 0 ? (page - 1) * perPage: 1,
-      take: perPage > 0 ? perPage : 15,
+      where,
+      orderBy: { [orderByField]: orderByDir },
+      skip: (page - 1) * perPage,
+      take: perPage,
     });
 
     return {
       items: authors,
       currentPage: page,
       perPage,
-      lastPage: Math.ceil(count / perPage),
-      total: count
-    }
+      lastPage: Math.ceil(total / perPage),
+      total,
+    };
   }
 
   async get(id: string): Promise<Author> {
