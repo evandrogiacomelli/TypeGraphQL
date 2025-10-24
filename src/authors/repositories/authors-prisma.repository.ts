@@ -1,8 +1,4 @@
-import {
-  IAuthorsRepository,
-  SearchParams,
-  SearchResult,
-} from '@/authors/interfaces/authors.repository'
+import { IAuthorsRepository, SearchParams, SearchResult, } from '@/authors/interfaces/authors.repository'
 import { Author } from '../graphql/models/author'
 import { ICreateAuthor } from '../interfaces/create-author'
 import { PrismaService } from '@/database/prisma/prisma.service'
@@ -14,8 +10,8 @@ export class AuthorsPrismaRepository implements IAuthorsRepository {
 
   constructor(private prisma: PrismaService) {}
 
-  create(data: ICreateAuthor): Promise<Author> {
-    throw new Error('Method not implemented.')
+  async create(data: ICreateAuthor): Promise<Author> {
+    return await this.prisma.author.create({ data })
   }
 
   update(author: Author): Promise<Author> {

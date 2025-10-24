@@ -44,4 +44,13 @@ describe( 'AuthorsPrismaRepository', () => {
     const res = await repository.findById(author.id);
     expect(res).toStrictEqual(author);
   })
+
+  test('should create an author', async () => {
+    const data = AuthorDataBuilder({});
+
+    const author = await repository.create(data);
+
+    const res = await repository.findById(author.id);
+    expect(author).toMatchObject(res);
+  })
 })
