@@ -1,16 +1,12 @@
 import { AuthorsPrismaRepository } from '@/authors/repositories/authors-prisma.repository'
+import { AuthorOutput } from '@/authors/dto/author-output'
 
 export namespace Usecase {
   export type Input = {
     id: string;
   }
 
-  export type Output = {
-    id: string;
-    name: string;
-    email: string;
-    createdAt: Date;
-  }
+  export type Output = AuthorOutput;
 
   export class UseCase {
     constructor(private authorsRepository: AuthorsPrismaRepository) {

@@ -1,6 +1,7 @@
 import { AuthorsPrismaRepository } from '@/authors/repositories/authors-prisma.repository'
 import { BadRequestError } from '@/shared/errors/bad-request-error'
 import { ConflictError } from '@/shared/errors/conflict-error'
+import { AuthorOutput } from '@/authors/dto/author-output'
 
 export namespace CreateAuthorUsecase {
 
@@ -9,12 +10,7 @@ export namespace CreateAuthorUsecase {
     email: string;
   }
 
-  export type Output = {
-    id: string;
-    name: string;
-    email: string;
-    createdAt: Date;
-  }
+  export type Output = AuthorOutput;
 
   export class UseCase {
     constructor(private authorsRepository: AuthorsPrismaRepository) {
